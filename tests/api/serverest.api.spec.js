@@ -16,6 +16,26 @@ test.describe('API ServeRest', () => {
     expect(await detail.json()).toMatchObject({ _id: product._id, nome: product.nome });
   });
 
+  test('filtra produtos pelo nome', async ({ request }) => {
+    const allProducts = await request.get(`${API_URL}/produtos`);
+    const product = (await allProducts.json()).produtos[0];
+    const filtered = await request.get(`${API_URL}/produtos`, { params: { nome: product.nome } });
+
+    expect(filtered.status()).toBe(200);
+    expect((await filtered.json()).produtos.some(item => item._id === product._id)).toBe(true);
+  });
+
+  test('consulta os dados de um usuário pelo ID', async ({ request, customer }) => {
+    const response = await request.get(`${API_URL}/usuarios/${customer.id}`);
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toMatchObject({
+      _id: customer.id,
+      nome: customer.nome,
+      email: customer.email,
+      administrador: 'false',
+    });
+  });
+
   test('cadastra usuário, localiza por email e autentica', async ({ request }) => {
     const payload = {
       nome: 'QA Playwright API',
@@ -63,6 +83,24 @@ test.describe('API ServeRest', () => {
     });
     expect(response.status()).toBe(401);
     expect((await response.json()).message).toMatch(/token/i);
+  });
+
+  test('impede que usuário comum cadastre produtos', async ({ request, customer }) => {
+    const login = await request.post(`${API_URL}/login`, { data: { email: customer.email, password: customer.password } });
+    expect(login.status()).toBe(200);
+    const { authorization } = await login.json();
+    const response = await request.post(`${API_URL}/produtos`, {
+      headers: { authorization },
+      data: {
+        nome: `Produto não autorizado ${Date.now()}`,
+        preco: 1,
+        descricao: 'Tentativa de cadastro por usuário comum',
+        quantidade: 1,
+      },
+    });
+
+    expect(response.status()).toBe(403);
+    expect((await response.json()).message).toMatch(/exclusiva para administradores/i);
   });
 
   test('cliente autenticado cria carrinho e cancela a compra', async ({ request, customer }) => {

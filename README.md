@@ -4,8 +4,8 @@ Projeto de automação em JavaScript para a interface de [front.serverest.dev](h
 
 ## Cobertura
 
-- Interface: formulário, login inválido, cadastro pelo site, autenticação bem-sucedida, catálogo, busca, detalhes do produto e logout.
-- API: consulta de produtos e usuários, cadastro, duplicidade, autenticação válida/inválida, controle de acesso ao carrinho, criação e cancelamento de compra.
+- Interface: formulário, login inválido, cadastro pelo site, autenticação bem-sucedida, catálogo, busca, detalhes do produto, lista de compras, quantidade de itens e logout.
+- API: consulta e filtro de produtos, consulta de usuários por ID, cadastro, duplicidade, autenticação válida/inválida, permissões de usuário comum e fluxo de carrinho.
 - Os testes usam e-mails aleatórios e limpam os usuários criados quando possível. O serviço público apaga dados periodicamente e pode variar durante execuções.
 
 ## Requisitos

@@ -69,6 +69,28 @@ test.describe('Interface ServeRest', () => {
     await expect(page.locator('body')).toContainText(productName);
   });
 
+  test('adiciona produto à lista de compras e altera a quantidade', async ({ page, customer }) => {
+    await page.goto('/login');
+    await page.locator('input[name="email"]').fill(customer.email);
+    await page.locator('input[name="password"]').fill(customer.password);
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await expect(page).toHaveURL(/\/home$/);
+
+    const firstCard = page.locator('.card').first();
+    const productName = (await firstCard.innerText()).split('\n').map(line => line.trim()).find(Boolean);
+    await firstCard.getByRole('button', { name: /Adicionar a lista/i }).click();
+    await page.getByTestId('lista-de-compras').click();
+    await expect(page).toHaveURL(/\/minhaListaDeProdutos$/);
+    await expect(page.getByRole('heading', { name: 'Lista de Compras' })).toBeVisible();
+    await expect(page.locator('body')).toContainText(productName);
+    await expect(page.locator('body')).toContainText('Total: 1');
+
+    await page.getByRole('button', { name: '+' }).click();
+    await expect(page.locator('body')).toContainText('Total: 2');
+    await page.getByRole('button', { name: '-' }).click();
+    await expect(page.locator('body')).toContainText('Total: 1');
+  });
+
   test('logout encerra a sessão e volta para login', async ({ page, customer }) => {
     await page.goto('/login');
     await page.locator('input[name="email"]').fill(customer.email);
