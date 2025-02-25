@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Playwright: instalar dependências",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: instalar Chromium",
+      "type": "shell",
+      "command": "npx playwright install chromium",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: executar todos os testes",
+      "type": "npm",
+      "script": "test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: testes de interface",
+      "type": "npm",
+      "script": "test:e2e",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: testes de API",
+      "type": "npm",
+      "script": "test:api",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: abrir relatório HTML",
+      "type": "npm",
+      "script": "report",
+      "problemMatcher": []
+    }
+  ]
+}
