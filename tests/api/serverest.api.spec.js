@@ -121,4 +121,34 @@ test.describe('API ServeRest', () => {
     expect(cancellation.status()).toBe(200);
     expect((await cancellation.json()).message).toMatch(/sucesso/i);
   });
+
+  test('consulta carrinho por ID e impede excluir usuário com carrinho ativo', async ({ request, customer }) => {
+    const login = await request.post(`${API_URL}/login`, { data: { email: customer.email, password: customer.password } });
+    expect(login.status()).toBe(200);
+    const { authorization } = await login.json();
+    const productsResponse = await request.get(`${API_URL}/produtos`);
+    const [{ _id: idProduto }] = (await productsResponse.json()).produtos;
+    const cart = await request.post(`${API_URL}/carrinhos`, {
+      headers: { authorization },
+      data: { produtos: [{ idProduto, quantidade: 1 }] },
+    });
+    expect(cart.status()).toBe(201);
+    const createdCart = await cart.json();
+
+    try {
+      const lookup = await request.get(`${API_URL}/carrinhos/${createdCart._id}`);
+      expect(lookup.status()).toBe(200);
+      expect(await lookup.json()).toMatchObject({
+        _id: createdCart._id,
+        idUsuario: customer.id,
+        produtos: [{ idProduto, quantidade: 1 }],
+      });
+
+      const deletion = await request.delete(`${API_URL}/usuarios/${customer.id}`);
+      expect(deletion.status()).toBe(400);
+      expect((await deletion.json()).idCarrinho).toBe(createdCart._id);
+    } finally {
+      await request.delete(`${API_URL}/carrinhos/cancelar-compra`, { headers: { authorization } });
+    }
+  });
 });
